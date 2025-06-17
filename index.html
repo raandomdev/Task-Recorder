@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Recorder - The Best Mouse & Keyboard Recorder</title>
+    <link rel="icon" type="image/png" href="https://imgur.com/a/5czz8ob">
+    <link rel="apple-touch-icon" href="https://imgur.com/a/5czz8ob">
+    <meta name="description" content="Task Recorder - A free and reliable mouse/keyboard recorder for Windows, macOS, and Linux. Inspired by TinyTask, designed for efficiency.">
+    <meta name="theme-color" content="#7289da">
+    <style>
+        :root {
+            --primary-color: #7289da;
+            --primary-dark: #5865f2;
+            --background-color: #0a0a0f;
+            --text-color: #ffffff;
+            --secondary-color: #1a1a24;
+            --accent-color: #00b0f4;
+            --gradient: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        }
+
+        [data-theme="light"] {
+            --primary-color: #5865f2;
+            --background-color: #ffffff;
+            --text-color: #2c2f33;
+            --secondary-color: #f6f6f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(44, 47, 51, 0.8);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-switch:hover {
+            transform: scale(1.05);
+            background: var(--gradient);
+        }
+
+        .mouse-light {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 255, 0.3) 0%,
+                rgba(255, 255, 255, 0.2) 30%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 70%
+            );
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            transition: transform 0.1s ease-out;
+            mix-blend-mode: screen;
+        }
+
+        .cloud-container {
+            position: relative;
+            min-height: 100vh;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #1a1a1a, #2c2f33);
+        }
+
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            animation: float 20s infinite linear;
+        }
+
+        .cloud:nth-child(1) {
+            width: 200px;
+            height: 60px;
+            top: 20%;
+            left: -200px;
+            animation-duration: 30s;
+        }
+
+        .cloud:nth-child(2) {
+            width: 300px;
+            height: 80px;
+            top: 40%;
+            left: -300px;
+            animation-duration: 40s;
+        }
+
+        .cloud:nth-child(3) {
+            width: 250px;
+            height: 70px;
+            top: 60%;
+            left: -250px;
+            animation-duration: 35s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateX(0);
+                left: -300px;
+            }
+            100% {
+                transform: translateX(calc(100vw + 300px));
+            }
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .title {
+            font-size: 4.5rem;
+            margin-bottom: 1.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(114, 137, 218, 0.5);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from {
+                text-shadow: 0 0 20px rgba(114, 137, 218, 0.5);
+            }
+            to {
+                text-shadow: 0 0 40px rgba(114, 137, 218, 0.8);
+            }
+        }
+
+        .description {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 0 auto;
+            transition: color 0.3s;
+        }
+
+        .section {
+            background: rgba(44, 47, 51, 0.8);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .credits {
+            text-align: center;
+            padding: 2rem 0;
+            color: #b9bbbe;
+        }
+
+        .credits h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .license {
+            font-size: 0.9rem;
+            color: #72767d;
+            margin-top: 1rem;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .software-preview {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto;
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .software-preview:hover {
+            transform: scale(1.02);
+        }
+
+        .software-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .download-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .download-btn {
+            background: var(--gradient);
+            color: white;
+            padding: 1.2rem 2.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .download-btn:hover::before {
+            left: 100%;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(114, 137, 218, 0.4);
+        }
+
+        .download-btn i {
+            font-size: 1.5rem;
+        }
+
+        .version-info {
+            text-align: center;
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .nav-links {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            background: rgba(44, 47, 51, 0.8);
+            padding: 0.5rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            background: transparent;
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .nav-link:hover::before {
+            opacity: 1;
+        }
+
+        .creator-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            padding: 2.5rem;
+            background: var(--gradient);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .creator-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        .creator-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--text-color);
+            box-shadow: 0 0 30px rgba(114, 137, 218, 0.5);
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .creator-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .creator-info h3 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(114, 137, 218, 0.3);
+        }
+
+        .creator-info p {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            color: var(--text-color);
+            font-size: 1.8rem;
+            transition: all 0.3s ease;
+            padding: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        .social-link:hover {
+            color: var(--text-color);
+            transform: translateY(-3px) rotate(360deg);
+            background: var(--gradient);
+            box-shadow: 0 5px 15px rgba(114, 137, 218, 0.3);
+        }
+
+        .search-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 300px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: none;
+            background: rgba(44, 47, 51, 0.8);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-bar:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+            width: 350px;
+            background: rgba(44, 47, 51, 0.9);
+            border-color: var(--primary-color);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--secondary-color);
+            border-radius: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--primary-color);
+        }
+
+        .highlight-search {
+            background-color: var(--primary-color);
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 3rem;
+            }
+
+            .nav-links {
+                bottom: 20px;
+                top: auto;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .theme-switch {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .search-container {
+                top: 80px;
+            }
+        }
+
+        .projects-tabs {
+            margin-top: 2rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient);
+            transition: 0.5s;
+            z-index: 0;
+        }
+
+        .tab-btn:hover::before {
+            left: 0;
+        }
+
+        .tab-btn.active {
+            background: var(--gradient);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(114, 137, 218, 0.3);
+        }
+
+        .tab-content {
+            background: var(--secondary-color);
+            border-radius: 15px;
+            padding: 2rem;
+            min-height: 300px;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .project-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <button class="theme-switch" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    <div class="mouse-light"></div>
+    
+    <div class="search-container">
+        <input type="text" class="search-bar" placeholder="Search..." id="searchInput">
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <nav class="nav-links">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#projects" class="nav-link">Projects</a>
+        <a href="#download" class="nav-link">Downloads</a>
+        <a href="#about" class="nav-link">About</a>
+    </nav>
+
+    <div class="cloud-container">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+        
+        <div class="content">
+            <header id="home" class="header">
+                <h1 class="title">Task Recorder</h1>
+                <p class="description">
+                    A free and reliable mouse/keyboard recorder, greatly inspired by TinyTask. 
+                    Set to be the BEST Remote record made for Windows/Mac/Linux!
+                </p>
+            </header>
+
+            <section class="section">
+                <h2>Software Preview</h2>
+                <div class="software-preview">
+                    <img src="https://imgur.com/a/5czz8ob" alt="Task Recorder Interface" onerror="this.src='https://via.placeholder.com/800x450?text=Task+Recorder+Interface'">
+                </div>
+            </section>
+
+            <section id="download" class="section">
+                <h2>Downloads</h2>
+                <div class="download-buttons">
+                    <a href="#" class="download-btn">
+                        <i class="fab fa-windows"></i>
+                        Windows
+                    </a>
+                    <a href="#" class="download-btn">
+                        <i class="fab fa-apple"></i>
+                        macOS
+                    </a>
+                    <a href="#" class="download-btn">
+                        <i class="fab fa-linux"></i>
+                        Linux
+                    </a>
+                </div>
+                <p class="version-info">Current Version: 1.0.0 [For all software]</p>
+            </section>
+
+            <section id="projects" class="section">
+                <h2>Projects</h2>
+                <div class="projects-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="task-recorder">Task Recorder</button>
+                        <button class="tab-btn" data-tab="project-2">Project 2</button>
+                        <button class="tab-btn" data-tab="project-3">Project 3</button>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="task-recorder">
+                            <h3>Task Recorder</h3>
+                            <p>A powerful mouse and keyboard recorder for Windows, macOS, and Linux.</p>
+                            <div class="project-features">
+                                <div class="feature">
+                                    <i class="fas fa-mouse-pointer"></i>
+                                    <h4>Mouse Recording</h4>
+                                    <p>Record and replay mouse movements with precision</p>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-keyboard"></i>
+                                    <h4>Keyboard Recording</h4>
+                                    <p>Capture and replay keyboard inputs accurately</p>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-clock"></i>
+                                    <h4>Time Control</h4>
+                                    <p>Adjust playback speed and timing</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="project-2">
+                            <h3>Project 2</h3>
+                            <p>Coming soon...</p>
+                        </div>
+                        <div class="tab-pane" id="project-3">
+                            <h3>Project 3</h3>
+                            <p>Coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="about" class="section">
+                <h2>About the Creator</h2>
+                <div class="creator-section">
+                    <img src="https://via.placeholder.com/150" alt="Creator" class="creator-image">
+                    <div class="creator-info">
+                        <h3>r4ndomdev</h3>
+                        <p>
+                            About the Creator
+                            Hello! I'm a passionate software developer with experience in Python, C, C++, C#, and JavaScript. My goal is to create practical, easy-to-use applications that enhance your day-to-day computer experience. I develop tools across multiple platforms—Windows, macOS, and Linux—to ensure accessibility for all users.
+
+                            Credits & Attributions 📖
+                            Project Inspiration: This software was heavily inspired by the popular utility TinyTask, which served as the foundation for many of Task-Recorder's features and goals.
+
+                            Licensing: Every project made is released under the Apache License.
+                            Please note: This is a closed-source project. Any attempt to decompile, reverse-engineer, or access the source code without authorization may result in a DMCA takedown notice.
+                        </p>
+                        <div class="social-links">
+                            <a href="https://github.com/raandomdev/Task-Recorder/tree/main" class="social-link" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link" target="_blank" rel="noopener noreferrer"><i class="fab fa-discord"></i></a>
+                            <a href="http://tiktok.com/@raandomdev" class="social-link" target="_blank" rel="noopener noreferrer"><i class="fab fa-tiktok"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Credits and Attributions 📖</h2>
+                <p>
+                    This software is closed source, and any attempt to reach or somehow get the code, 
+                    will be met with a DMCA Copyright Notice. This Software is under the license 
+                    <span class="highlight">Apache License</span>
+                </p>
+                <p class="license">
+                    Credits: This project was greatly inspired by TinyTask
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Mouse light effect
+        document.addEventListener('mousemove', (e) => {
+            const light = document.querySelector('.mouse-light');
+            light.style.left = e.clientX + 'px';
+            light.style.top = e.clientY + 'px';
+        });
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        const content = document.querySelector('.content');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            if (searchTerm.length < 2) {
+                searchResults.classList.remove('active');
+                return;
+            }
+
+            const sections = content.querySelectorAll('section, header');
+            let results = [];
+
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    const title = section.querySelector('h1, h2')?.textContent || 'Section';
+                    const excerpt = text.substring(
+                        text.indexOf(searchTerm),
+                        text.indexOf(searchTerm) + 100
+                    ) + '...';
+
+                    results.push({
+                        title,
+                        excerpt,
+                        element: section
+                    });
+                }
+            });
+
+            displayResults(results, searchTerm);
+        });
+
+        function displayResults(results, searchTerm) {
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+            } else {
+                searchResults.innerHTML = results.map(result => `
+                    <div class="search-result-item" onclick="scrollToSection('${result.element.id}')">
+                        <strong>${highlightText(result.title, searchTerm)}</strong><br>
+                        ${highlightText(result.excerpt, searchTerm)}
+                    </div>
+                `).join('');
+            }
+            searchResults.classList.add('active');
+        }
+
+        function highlightText(text, searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight-search">$1</span>');
+        }
+
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+                searchResults.classList.remove('active');
+                searchInput.value = '';
+            }
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        // Intersection Observer for section animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and panes
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding pane
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html> 

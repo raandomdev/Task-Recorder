@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Recorder - The Best Mouse & Keyboard Recorder</title>
-    <link rel="icon" type="image/png" href="https://imgur.com/a/5czz8ob">
-    <link rel="apple-touch-icon" href="https://imgur.com/a/5czz8ob">
-    <meta name="description" content="Task Recorder - A free and reliable mouse/keyboard recorder for Windows, macOS, and Linux. Inspired by TinyTask, designed for efficiency.">
+    <title>r4ndomdev - Enchance your computer</title>
+    <link rel="icon" type="image/png" href="https://i.imgur.com/5czz8ob.png">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/5czz8ob.png">
+    <meta name="description" content="Enchance your computer experience for Windows, macOS, and Linux, designed for efficiency.">
     <meta name="theme-color" content="#7289da">
     <style>
         :root {
@@ -632,17 +632,17 @@
         
         <div class="content">
             <header id="home" class="header">
-                <h1 class="title">Task Recorder</h1>
+                <h1 class="title">r4ndomdev</h1>
                 <p class="description">
-                    A free and reliable mouse/keyboard recorder, greatly inspired by TinyTask. 
-                    Set to be the BEST Remote record made for Windows/Mac/Linux!
+                    Free softwares to enchance your day-to-day computer experience
+                    made for Windows/Mac/Linux!
                 </p>
             </header>
 
             <section class="section">
                 <h2>Software Preview</h2>
                 <div class="software-preview">
-                    <img src="https://imgur.com/a/5czz8ob" alt="Task Recorder Interface" onerror="this.src='https://via.placeholder.com/800x450?text=Task+Recorder+Interface'">
+                    <img src="https://imgur.com/a/5czz8ob" alt="Task Recorder Interface" onerror="this.src='https://imgur.com/a/5czz8ob'">
                 </div>
             </section>
 
@@ -718,7 +718,7 @@
                             Hello! I'm a passionate software developer with experience in Python, C, C++, C#, and JavaScript. My goal is to create practical, easy-to-use applications that enhance your day-to-day computer experience. I develop tools across multiple platforms—Windows, macOS, and Linux—to ensure accessibility for all users.
 
                             Credits & Attributions 📖
-                            Project Inspiration: This software was heavily inspired by the popular utility TinyTask, which served as the foundation for many of Task-Recorder's features and goals.
+                            Project Inspiration: Task-Recorder software was heavily inspired by the popular utility TinyTask, which served as the foundation for many of Task-Recorder's features and goals.
 
                             Licensing: Every project made is released under the Apache License.
                             Please note: This is a closed-source project. Any attempt to decompile, reverse-engineer, or access the source code without authorization may result in a DMCA takedown notice.
@@ -735,7 +735,7 @@
             <section class="section">
                 <h2>Credits and Attributions 📖</h2>
                 <p>
-                    This software is closed source, and any attempt to reach or somehow get the code, 
+                    All software is closed source, and any attempt to reach or somehow get the code, 
                     will be met with a DMCA Copyright Notice. This Software is under the license 
                     <span class="highlight">Apache License</span>
                 </p>
@@ -755,20 +755,17 @@
             localStorage.setItem('theme', newTheme);
         }
 
-        // Load saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             document.body.setAttribute('data-theme', savedTheme);
         }
 
-        // Mouse light effect
         document.addEventListener('mousemove', (e) => {
             const light = document.querySelector('.mouse-light');
             light.style.left = e.clientX + 'px';
             light.style.top = e.clientY + 'px';
         });
 
-        // Search functionality
         const searchInput = document.getElementById('searchInput');
         const searchResults = document.getElementById('searchResults');
         const content = document.querySelector('.content');
@@ -831,14 +828,12 @@
             }
         }
 
-        // Close search results when clicking outside
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.classList.remove('active');
             }
         });
 
-        // Intersection Observer for section animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -853,17 +848,14 @@
             observer.observe(section);
         });
 
-        // Tab functionality
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabPanes = document.querySelectorAll('.tab-pane');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Remove active class from all buttons and panes
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabPanes.forEach(pane => pane.classList.remove('active'));
 
-                // Add active class to clicked button and corresponding pane
                 button.classList.add('active');
                 const tabId = button.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
